@@ -1,0 +1,106 @@
+#! python 3
+from selenium import webdriver
+import requests
+from bs4 import BeautifulSoup
+import csv
+import codecs
+import lxml
+
+# Считывает количество вхождений запросов в разных блоках кода
+def write_csv(data):
+    with open('result occurences on sites' + '.csv', 'a', newline='',encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+
+
+def get_html(url):
+    r = requests.get(url)
+    return(BeautifulSoup(r.text, "html.parser"))
+
+
+def main():
+    # print('Iput occurences comma separated')
+    # inquires = input()
+    inquires = '''раскрутка сайтов
+,раскрутка сайта
+,продвижение сайтов
+,продвижение сайта
+,поисковое продвижение
+,поисковое продвижение сайта
+,поисковое продвижение сайтов
+,seo продвижение
+,seo раскрутка сайта
+,продвижение веб сайта
+,seo интернет сайта
+,продвижение сайта в интернете
+,заказать продвижение сайта'''
+    # ,продвижение сайта,поисковое продвижение,поисковое продвижение сайта,поисковое продвижение сайтов,сайт продвижение,сайт раскрутка,seo продвижение,seo сайта'
+    inquires = inquires.replace('\n','')
+    inquires = inquires.split(',')
+    print(inquires)
+    # print('Iput site url comma separated')
+    # urls = input()
+    urls= '''https://www.iseo.ru/
+,https://www.mosseo.ru/
+,https://promo.ingate.ru/
+,https://o-es.ru/
+,https://qweo.ru/
+,https://www.optimism.ru/
+,https://akudinov.ru/
+,https://seo.ru/
+,https://я-топ.сайт/
+,https://prodvizhenie-saita.com/
+,https://exiterra.com/
+,https://seologica.ru/'''
+    # https://pixelplus.ru/poiskovoe_prodvizhenie_sajtov/,https://www.mosseo.ru/'
+    urls = urls.replace('\n','')
+    urls = urls.split(',')  
+
+    data_urls = {}
+    browser = webdriver.Chrome()
+    for url in urls:
+        browser.get(url)
+        data_urls['all words in ' + url] = browser.find_element_by_tag_name('body').text.expandtabs(1).count(' ')
+    browser.quit()
+    
+    data_tags = ['body','p','a','img','h1','h2','h3','li','ol']
+    data_tags_for_csv = ['']
+    for d in data_tags:
+        data_tags_for_csv.append(d)
+        data_tags_for_csv.append('')
+    data_tags_for_csv.append('all words')
+    
+    for inquiry in inquires:
+        print(inquiry)
+        write_csv([inquiry])
+        write_csv(data_tags_for_csv)
+        for url in urls: 
+            page_code = get_html(url)
+            data_occurents = [url]
+            for tag in data_tags:
+                tag_texts = page_code.findAll(tag)
+                count_occurences = 0
+                for tag_text in tag_texts:
+                    count_occurences = count_occurences + (str(tag_text)).lower().count(inquiry)
+                data_occurents.append(count_occurences)
+                data_occurents.append(count_occurences/int(data_urls['all words in ' + url]))
+            data_occurents.append(data_urls['all words in ' + url])
+            write_csv(data_occurents)
+        write_csv(' ')
+    # 
+    # for url in urls: 
+    #     page_code = str(get_html(url)) 
+    #     result_in_file = [url]    
+    #     write_csv(result_in_file)           
+    # with codecs.open(name_file_product + '.txt', encoding='utf-8') as loadProducts:
+    #     loadProducts.seek(0)
+    #     fullName = loadProducts.readlines()
+    #     loadProducts.close()    
+    # with codecs.open(name_file_articul + '.txt', encoding='utf-8') as loadProductsArticul:
+    #     loadProductsArticul.seek(0)
+    #     articul = loadProductsArticul.readlines()
+    #     loadProductsArticul.close()
+
+
+if __name__ == '__main__':
+    main()
