@@ -1,0 +1,48 @@
+#! python 3
+import requests
+from bs4 import BeautifulSoup
+import csv
+import codecs
+import lxml
+
+
+def write_csv(data):
+    with open('result parsing title and description' + '.csv', 'a', newline='',encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow((data.split(',')))
+
+
+def get_html(url):
+    r = requests.get(url)
+    return(BeautifulSoup(r.text, "html.parser").head)
+
+
+def main():
+    print('Iput site url comma separated')
+    # urls = input()
+    urls= '''https://www.iseo.ru/
+,https://www.mosseo.ru/
+,https://promo.ingate.ru/
+,https://o-es.ru/
+,https://qweo.ru/
+,https://www.optimism.ru/
+,https://akudinov.ru/
+,https://seo.ru/
+,https://я-топ.сайт/
+,https://prodvizhenie-saita.com/
+,https://exiterra.com/
+,https://seologica.ru/'''
+    urls = urls.replace('\n','')
+    urls = urls.split(',')  
+    write_csv(' ,title,description')
+    for url in urls: 
+        text = get_html(url)
+        title = str(text.title).replace('<title>','').replace('</title>','')
+        description = str(text.description)
+        result_in_file = url + ','    
+        result_in_file = result_in_file + title + ',' + description + ','
+        write_csv(result_in_file)           
+
+
+if __name__ == '__main__':
+    main()
