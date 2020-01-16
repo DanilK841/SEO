@@ -1,0 +1,65 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+import csv
+import datetime
+
+
+def write_csv(data):
+    d = datetime.date.today()
+    with open('parsing' + str(d.day) + str(d.month) + '.csv', 'a', newline='',encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+
+def main():
+    print('Введи количество страниц для парсинга')
+    amount_page_parsing = int(input())
+    data = []
+    browser = webdriver.Chrome()
+    browser.implicitly_wait(10)
+
+    browser.get('https://yandex.ru/tune/geo/?retpath=https%3A%2F%2Fyandex.ru%2F%3Fdomredir%3D1&nosync=1')
+    browser.find_element_by_xpath('//*[@id="city__front-input"]').clear()
+    browser.find_element_by_xpath('//*[@id="city__front-input"]').send_keys('Москва')
+    print('Выбрать город и нажми что-тов консоли')
+    input()
+    # ActionChains(browser).click(browser.find_element_by_xpath('//*[@id="city__front-input"]')).send_keys(Keys.ARROW_DOWN,Keys.ENTER).perform()
+
+    inquires = '''раскрутка сайтов
+,раскрутка сайта
+,продвижение сайтов
+,продвижение сайта
+,поисковое продвижение
+,поисковое продвижение сайта
+,поисковое продвижение сайтов
+,seo продвижение
+,seo раскрутка сайта
+,продвижение веб сайта
+,seo интернет сайта
+,продвижение сайта в интернете
+,заказать продвижение сайта'''
+    # ,продвижение сайта,поисковое продвижение,поисковое продвижение сайта,поисковое продвижение сайтов,сайт продвижение,сайт раскрутка,seo продвижение,seo сайта'
+    inquires = inquires.replace('\n','')
+    inquires = inquires.split(',')
+    for inquir in inquires:
+        data.append(inquir)
+        for page_numb in range(amount_page_parsing):
+            try:
+                browser.get('https://yandex.ru/search/?text=' + inquir + '&p=' + str(page_numb))
+                if(browser.current_url.find('captcha') != -1):
+                    print('Введи капчу и нажми что-о в консоли')
+                    input()
+            except:
+                print('trouble')
+            urls = browser.find_elements_by_class_name('typo_type_greenurl')
+            for url in urls:
+                data.append(url.text.replace('\n','-'))
+        write_csv(data)
+        data = []
+
+
+
+
+
+if __name__ == '__main__':
+    main()
